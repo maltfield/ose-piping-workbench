@@ -43,11 +43,16 @@ class OsePipingWorkbench (Workbench):
         import OsePipingBase
         # import here all the needed files that create your FreeCAD commands
         import OsePipingCommands
-        self.list = ["OsePiping_Pipe", "OsePiping_Coupling", "OsePiping_Bushing", "OsePiping_Elbow", "OsePiping_SweepElbow",
+        self.partList = ["OsePiping_Pipe", "OsePiping_Coupling", "OsePiping_Bushing", "OsePiping_Elbow", "OsePiping_SweepElbow",
                      "OsePiping_Tee", "OsePiping_Corner", "OsePiping_Cross"]  # A list of command names created in the line above
         # creates a new toolbar with your commands
-        self.appendToolbar("Ose Piping", self.list)
-        self.appendMenu("Command Menu", self.list)  # creates a new menu
+        self.appendToolbar("Ose Piping", self.partList)
+        self.appendMenu("Command Menu", self.partList)  # creates a new menu
+
+        # Add commods to move and rotate parts.
+        self.modificationList = ["OsePiping_Move", "OsePiping_Rotate"]
+        self.appendToolbar("Modification", self.modificationList)
+        self.appendMenu("Modification", self.modificationList)  # creates a new menu
         #OSE_PipingWorkbench.Icon = os.path.join(OSEBase.ICON_PATH,"Workbench.svg")
 
         # FreeCADGui.addIconPath(":/Resources/icons")
@@ -68,7 +73,7 @@ class OsePipingWorkbench (Workbench):
         "This is executed whenever the user right-clicks on screen"
         # "recipient" will be either "view" or "tree"
         # add commands to the context menu
-        self.appendContextMenu("Piping commands", self.list)
+        self.appendContextMenu("Piping commands", self.partList)
 
     def GetClassName(self):
         # this function is mandatory if this is a full python workbench

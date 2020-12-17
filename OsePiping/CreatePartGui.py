@@ -374,7 +374,7 @@ class BaseDialog(QtGui.QDialog):
                     # Ports of the object to whom the object will be moved.
                     fix_ports = Port.extractAdvancedPorts(target)
 
-                    # Find nearest pod.
+                    # Find the closest port to a selected surface or edge.
                     closest_port = Port.getNearestPort(
                         target.Placement, fix_ports, sub.CenterOfMass)
 

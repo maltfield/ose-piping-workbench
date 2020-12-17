@@ -24,6 +24,8 @@
 # ***************************************************************************
 
 import FreeCAD
+from FreeCAD import Gui
+
 import OsePipingBase
 import OsePiping.CouplingGui as CouplingGui
 import OsePiping.PipeGui as PipeGui
@@ -33,8 +35,9 @@ import OsePiping.CornerGui as CornerGui
 import OsePiping.ElbowGui as ElbowGui
 import OsePiping.CrossGui as CrossGui
 import OsePiping.SweepElbowGui as SweepElbowGui
-
-from FreeCAD import Gui
+import OsePiping.Piping as Piping
+import OsePiping.Modification as Modification
+import OsePiping.Port as Port
 
 
 class OsePiping_PipeClass():
@@ -235,6 +238,77 @@ class OsePiping_CrossClass():
         return True
 
 
+class OsePiping_MoveClass():
+    def GetResources(self):
+        return {'Pixmap': OsePipingBase.ICON_PATH + '/Draft_Move.svg',  # the name of a svg file available in the resources
+                #                'Accel' : "Shift+S", # a default shortcut (optional)
+                'MenuText': "Move",
+                'ToolTip': "Move one Dodo-part to another Dodo-part."}
+
+    def getPort(self, sel):
+        obj = sel.Object
+        sub = sel.SubObjects[-1]
+        ports = Port.extractAdvancedPorts(obj)
+
+        closest_port = Port.getNearestPort(
+            obj.Placement, ports, sub.CenterOfMass)
+        return closest_port
+
+    def Activated(self):
+        "Do something here when button is clicked"
+        if Gui.ActiveDocument is None:
+            FreeCAD.newDocument()
+        # Get the port of the moved object. It is the last but one.
+        if len(Gui.Selection.getSelectionEx()) < 2:
+            FreeCAD.Console.PrintWarning("Select at least two objects.\n")
+            return
+        if not Modification.all_selected_parts_have_ports():
+            FreeCAD.Console.PrintWarning("All objects must be OSE-Piping objects.\n")
+            return
+        # Move next to last object to the last object.
+        dest_sel = Gui.Selection.getSelectionEx()[-2]
+        movable_sel = Gui.Selection.getSelectionEx()[-1]
+        if len(dest_sel.SubObjects) == 0:
+            FreeCAD.Console.PrintWarning("Select a surface or an edge for a destination port.\n")
+            return
+        if len(movable_sel.SubObjects) == 0:
+            FreeCAD.Console.PrintWarning("Select a surface or on edge of a movable part.\n")
+            return
+
+        dest_port = self.getPort(dest_sel)
+        moveble_port = self.getPort(movable_sel)
+
+        movable_sel.Object.Placement = moveble_port.getPartPlacement(dest_sel.Object.Placement, dest_port)
+
+    def IsActive(self):
+        """Here you can define if the command must be active or not (greyed) if certain conditions
+        are met or not. This function is optional."""
+        return (Piping.HasDodoSupport() or Piping.HasFlamingoSupport()) \
+            and len(Gui.Selection.getSelectionEx()) >= 2 \
+            and Modification.all_selected_parts_have_ports() \
+
+
+
+class OsePiping_RotateClass():
+    def GetResources(self):
+        return {'Pixmap': OsePipingBase.ICON_PATH + '/Draft_Rotate.svg',  # the name of a svg file available in the resources
+                #                'Accel' : "Shift+S", # a default shortcut (optional)
+                'MenuText': "Rotate",
+                'ToolTip': "Rotate a Dodo-Part."}
+
+    def Activated(self):
+        "Do something here when button is clicked"
+        if Gui.ActiveDocument is None:
+            FreeCAD.newDocument()
+        doc = FreeCAD.activeDocument()
+
+    def IsActive(self):
+        """Here you can define if the command must be active or not (greyed) if certain conditions
+        are met or not. This function is optional."""
+        #return Piping.HasDodoSupport() or Piping.HasFlamingoSupport()
+        return False  # Not yet implemented.
+
+
 Gui.addCommand('OsePiping_Pipe', OsePiping_PipeClass())
 Gui.addCommand('OsePiping_Coupling', OsePiping_CouplingClass())
 Gui.addCommand('OsePiping_Bushing', OsePiping_BushingClass())
@@ -243,3 +317,5 @@ Gui.addCommand('OsePiping_SweepElbow', OsePiping_SweepElbowClass())
 Gui.addCommand('OsePiping_Tee', OsePiping_TeeClass())
 Gui.addCommand('OsePiping_Corner', OsePiping_CornerClass())
 Gui.addCommand('OsePiping_Cross', OsePiping_CrossClass())
+Gui.addCommand('OsePiping_Move', OsePiping_MoveClass())
+Gui.addCommand('OsePiping_Rotate', OsePiping_RotateClass())
