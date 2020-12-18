@@ -26,7 +26,7 @@ class AdvancedPort:
     def getPartRotation(self, other_placement, other_port):
         """Return a rotation matrix wihch will rotate this port to the other port.
 
-        param other_part_rot: Rotation of the other pArt.
+        param other_placement:
         param other_port: other pOrt.
 
         """

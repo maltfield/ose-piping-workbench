@@ -65,8 +65,8 @@ class BaseDialog(QtGui.QDialog):
         # Fill table with dimensions.
         self.initTable()
 
-        # Restore previous user input. Ignore exceptions to prevent this part
-        # part of the code to prevent GUI from starting, once settings are broken.
+        # Restore previous user input.
+        # Ignore exceptions to start GUI even with broken settings.
         try:
             self.restoreInput()
         except Exception as e:
@@ -214,7 +214,7 @@ class BaseDialog(QtGui.QDialog):
                 "Use menu File->New to create a new document first, "\
                 "then try to create the {0} again.".format(
                     self.params.fittingType)
-            msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Warning, "Creating of the %s failed.".format(
+            msgBox = QtGui.QMessageBox(QtGui.QMessageBox.Warning, "Creating of the {} failed.".format(
                 self.params.fittingType), text)
             msgBox.exec_()
             super(BaseDialog, self).accept()
