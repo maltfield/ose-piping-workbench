@@ -25,6 +25,7 @@
 
 import FreeCAD
 from FreeCAD import Gui
+import FreeCADGui
 
 import OsePipingBase
 import OsePiping.CouplingGui as CouplingGui
@@ -58,7 +59,7 @@ class OsePiping_PipeClass():
         table = PipeGui.GuiCheckTable()
  #       FreeCAD.Console.PrintMessage("Showing pipe UI.")
         form = PipeGui.MainDialog(doc, table)
-        form.exec_()
+        form.exec_()  # Stand-alone dialog.
 
     def IsActive(self):
         """Here you can define if the command must be active or not (greyed) if certain conditions
@@ -303,9 +304,10 @@ class OsePiping_RotateClass():
         "Do something here when button is clicked"
         if Gui.ActiveDocument is None:
             FreeCAD.newDocument()
-        doc = FreeCAD.activeDocument()
-        form = RotateGui.MainDialog(doc)
-        form.exec_()
+        panel = RotateGui.RotatePanel()
+        Gui.Control.showDialog(panel)
+        panel.setupUi()
+        return panel
 
     def IsActive(self):
         """Here you can define if the command must be active or not (greyed) if certain conditions
