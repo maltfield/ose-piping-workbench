@@ -16,6 +16,29 @@ import OsePiping.Port as Port
 import OsePipingBase
 
 
+# See https://wiki.freecadweb.org/Code_snippets#Function_resident_with_the_mouse_click_action
+# Mabe there is a better way to update selections.
+class SelObserver:
+    def __init__(self, panel):
+        self.panel = panel
+
+    def setPreselection(self, doc, obj, sub):                # Preselection object
+        pass  # Do nothing
+
+    def addSelection(self, doc, obj, sub, pnt):               # Selection object
+        # doc is the name of the document.
+        self.panel.updatePart(FreeCAD.getDocument(doc))
+
+    def removeSelection(self, doc, obj, sub):                # Delete the selected object
+        self.panel.updatePart(FreeCAD.getDocument(doc))
+
+    def setSelection(self, doc):                           # Selection in ComboView
+        self.panel.updatePart(FreeCAD.getDocument(doc))
+
+    def clearSelection(self, doc):                         # If click on the screen, clear the selection
+        self.panel.updatePart(FreeCAD.getDocument(doc))
+
+
 # See https://github.com/yorikvanhavre/FreeCAD/blob/master/src/Mod/TemplatePyMod/TaskPanel.py
 class RotatePanel:
     QSETTINGS_APPLICATION = "OSE piping workbench"
@@ -24,12 +47,21 @@ class RotatePanel:
         self.ui = OsePipingBase.UI_PATH + "/rotate.ui"
         self.document = FreeCAD.activeDocument()
         self.part = Gui.Selection.getSelectionEx()[-1].Object
+        self.selObserver = SelObserver(self)
+        Gui.Selection.addObserver(self.selObserver)
 
     def accept(self):
+        # It is not called, because we do not show "OK"-Button.
+        FreeCAD.Console.PrintMessage("accept")
+        self.document.recompute()
+        Gui.Selection.removeObserver(self.selObserver)
         self.saveInput()
         return True
 
     def reject(self):
+        FreeCAD.Console.PrintMessage("reject")
+        self.document.recompute()
+        Gui.Selection.removeObserver(self.selObserver)
         return True
 
     def clicked(self, index):
@@ -95,6 +127,14 @@ class RotatePanel:
             print("Could not restore old user input!")
             print(e)
 
+        self.updateWidgets()
+
+    def updatePart(self, doc):
+        # Only react to activ document.
+        self.document = doc
+        self.part = Gui.Selection.getSelectionEx()[-1].Object
+
+    def updateWidgets(self):
         self.labelPartName.setText(self.part.Name)
         self.showPorts(self.part)
 
