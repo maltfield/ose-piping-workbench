@@ -16,6 +16,9 @@ import OsePiping.Port as Port
 import OsePipingBase
 
 
+parseQuantity = FreeCAD.Units.parseQuantity
+
+
 # See https://wiki.freecadweb.org/Code_snippets#Function_resident_with_the_mouse_click_action
 # Mabe there is a better way to update selections.
 class SelObserver:
@@ -106,9 +109,12 @@ class RotatePanel:
         self.radioZ = form.findChild(QtGui.QRadioButton, "radioZ")
         self.editDegree = form.findChild(QtGui.QLineEdit, "editDegree")
         self.dialDegree = form.findChild(QtGui.QDial, "dialDegree")
-
-        self.buttonApply = form.findChild(QtGui.QPushButton, "buttonApply")
         self.buttonReverse = form.findChild(QtGui.QPushButton, "buttonReverse")
+        self.buttonZeroAngle = form.findChild(QtGui.QPushButton, "buttonZeroAngle")
+
+        self.buttonZeroLength = form.findChild(QtGui.QPushButton, "buttonZeroLength")
+        self.editShift = form.findChild(QtGui.QLineEdit, "editShift")
+        self.buttonApply = form.findChild(QtGui.QPushButton, "buttonApply")
 
     def setupUi(self):
         # Call it from OsePipingCommands after Gui.Control.showDialog(panel)
@@ -139,20 +145,22 @@ class RotatePanel:
         self.showPorts(self.part)
 
     def setupCallbacks(self):
-        QtCore.QObject.connect(self.buttonApply, QtCore.SIGNAL("clicked()"), self.onApplyClicked)
-        QtCore.QObject.connect(self.radioX, QtCore.SIGNAL("clicked()"), self.onAxisRadioSelected)
-        QtCore.QObject.connect(self.radioY, QtCore.SIGNAL("clicked()"), self.onAxisRadioSelected)
-        QtCore.QObject.connect(self.radioZ, QtCore.SIGNAL("clicked()"), self.onAxisRadioSelected)
+        QtCore.QObject.connect(self.buttonReverse, QtCore.SIGNAL("clicked()"), self.onReverseClicked)
+        QtCore.QObject.connect(self.dialDegree, QtCore.SIGNAL("valueChanged(int)"), self.onDialDegreeChanged)
+        QtCore.QObject.connect(self.buttonZeroAngle, QtCore.SIGNAL("clicked()"), self.onZeroAngleClicked)
+        QtCore.QObject.connect(self.editDegree, QtCore.SIGNAL("editingFinished()"), self.onEditDegreeChanged)
         QtCore.QObject.connect(self.radioPort1, QtCore.SIGNAL("clicked()"), self.onPortRadioSelected)
         QtCore.QObject.connect(self.radioPort2, QtCore.SIGNAL("clicked()"), self.onPortRadioSelected)
         QtCore.QObject.connect(self.radioPort3, QtCore.SIGNAL("clicked()"), self.onPortRadioSelected)
         QtCore.QObject.connect(self.radioPort4, QtCore.SIGNAL("clicked()"), self.onPortRadioSelected)
         QtCore.QObject.connect(self.radioPort5, QtCore.SIGNAL("clicked()"), self.onPortRadioSelected)
         QtCore.QObject.connect(self.radioPort6, QtCore.SIGNAL("clicked()"), self.onPortRadioSelected)
-        QtCore.QObject.connect(self.radioX, QtCore.SIGNAL("clicked(bool)"), self.onAxisRadioSelected)
-        QtCore.QObject.connect(self.buttonReverse, QtCore.SIGNAL("clicked()"), self.onReverseClicked)
-        QtCore.QObject.connect(self.dialDegree, QtCore.SIGNAL("valueChanged(int)"), self.onDialDegreeChanged)
-        QtCore.QObject.connect(self.editDegree, QtCore.SIGNAL("editingFinished()"), self.onEditDegreeChanged)
+        QtCore.QObject.connect(self.radioX, QtCore.SIGNAL("clicked()"), self.onAxisRadioSelected)
+        QtCore.QObject.connect(self.radioY, QtCore.SIGNAL("clicked()"), self.onAxisRadioSelected)
+        QtCore.QObject.connect(self.radioZ, QtCore.SIGNAL("clicked()"), self.onAxisRadioSelected)
+        QtCore.QObject.connect(self.buttonZeroLength, QtCore.SIGNAL("clicked()"), self.onZeroLengthClicked)
+
+        QtCore.QObject.connect(self.buttonApply, QtCore.SIGNAL("clicked()"), self.onApplyClicked)
 
     def getMainWindow(self):
         "returns the main window"
@@ -181,7 +189,7 @@ class RotatePanel:
         settings.setValue("radioZ", self.radioZ.isChecked())
 
         settings.setValue("editDegree", str(self.editDegree.text()))
-
+        settings.setValue("editShift", str(self.editShift.text()))
         settings.sync()
 
     def restoreInput(self):
@@ -200,8 +208,8 @@ class RotatePanel:
         self.radioY.setChecked(bool(settings.value("radioY", False)))
         self.radioZ.setChecked(bool(settings.value("radioZ", False)))
 
-        s = settings.value("editDegree", "0")
-        self.editDegree.setText(s)
+        self.editDegree.setText(settings.value("editDegree", "0"))
+        self.editShift.setText(settings.value("editShift", "0mm"))
         self.onEditDegreeChanged()
 
     def showPorts(self, part):
@@ -259,28 +267,112 @@ class RotatePanel:
         v = 360 - self.dialDegree.value()
         self.dialDegree.setValue(v)
 
-    def onApplyClicked(self):
-        self.saveInput()
+    def onZeroAngleClicked(self):
+        self.dialDegree.setValue(0.0)
+
+    def onZeroLengthClicked(self):
+        self.editShift.setText("0mm")
+
+    def getRotation(self):
+        """Return rotation vector.
+
+        Return rotation vector. Return None if no Rotation
+        could be detected. Thes can happen if no check box
+        for rotation is selected or a non-existing port is selected.
+
+        return: Rotation matrix or None.
+        """
+        nports = len(self.part.Ports)
 
         angle = self.dialDegree.value()
         if self.radioX.isChecked():
-            R = FreeCAD.Rotation(FreeCAD.Vector(1, 0, 0), angle)  # Rotation matrix
+            return FreeCAD.Rotation(FreeCAD.Vector(1, 0, 0), angle)  # Rotation matrix
         elif self.radioY.isChecked():
-            R = FreeCAD.Rotation(FreeCAD.Vector(0, 1, 0), angle)
+            return FreeCAD.Rotation(FreeCAD.Vector(0, 1, 0), angle)
         elif self.radioZ.isChecked():
-            R = FreeCAD.Rotation(FreeCAD.Vector(0, 0, 1), angle)
-        elif self.radioPort1.isChecked():
-            R = FreeCAD.Rotation(self.part.Ports[0], angle)
-        elif self.radioPort2.isChecked():
-            R = FreeCAD.Rotation(self.part.Ports[1], angle)
-        elif self.radioPort3.isChecked():
-            R = FreeCAD.Rotation(self.part.Ports[2], angle)
-        elif self.radioPort4.isChecked():
-            R = FreeCAD.Rotation(self.part.Ports[3], angle)
-        elif self.radioPort5.isChecked():
-            R = FreeCAD.Rotation(self.part.Ports[4], angle)
-        elif self.radioPort6.isChecked():
-            R = FreeCAD.Rotation(self.part.Ports[5], angle)
+            return FreeCAD.Rotation(FreeCAD.Vector(0, 0, 1), angle)
+        elif self.radioPort1.isChecked() and nports >= 1:
+            return FreeCAD.Rotation(self.part.Ports[0], angle)
+        elif self.radioPort2.isChecked() and nports >= 2:
+            return FreeCAD.Rotation(self.part.Ports[1], angle)
+        elif self.radioPort3.isChecked() and nports >= 3:
+            return FreeCAD.Rotation(self.part.Ports[2], angle)
+        elif self.radioPort4.isChecked() and nports >= 4:
+            return FreeCAD.Rotation(self.part.Ports[3], angle)
+        elif self.radioPort5.isChecked() and nports >= 5:
+            return FreeCAD.Rotation(self.part.Ports[4], angle)
+        elif self.radioPort6.isChecked() and nports >= 6:
+            return FreeCAD.Rotation(self.part.Ports[5], angle)
         else:
-            return  # Do nothing.
+            return  # Return None.
+
+    def getShiftDirection(self):
+        """Return shift direction as a normalized Vector.
+
+        :return: Shift direction as a Vector.
+        :return: None, if the directon could not be determined.
+        """
+        nports = len(self.part.Ports)
+
+        if self.radioX.isChecked():
+            return FreeCAD.Vector(1, 0, 0)
+        elif self.radioY.isChecked():
+            return FreeCAD.Vector(0, 1, 0)
+        elif self.radioZ.isChecked():
+            return FreeCAD.Vector(0, 0, 1)
+        elif self.radioPort1.isChecked() and nports >= 1:
+            # Move towards the Port. Take in account the current rotation
+            # of the part.
+            v = self.part.Placement.Rotation.multVec(self.part.Ports[0])
+            return v / v.Length
+        elif self.radioPort2.isChecked() and nports >= 2:
+            v = self.part.Placement.Rotation.multVec(self.part.Ports[1])
+            return v / v.Length
+        elif self.radioPort3.isChecked() and nports >= 3:
+            v = self.part.Placement.Rotation.multVec(self.part.Ports[2])
+            return v / v.Length
+        elif self.radioPort4.isChecked() and nports >= 4:
+            v = self.part.Placement.Rotation.multVec(self.part.Ports[3])
+            return v / v.Length
+        elif self.radioPort5.isChecked() and nports >= 5:
+            v = self.part.Placement.Rotation.multVec(self.part.Ports[4])
+            return v / v.Length
+        elif self.radioPort6.isChecked() and nports >= 6:
+            v = self.part.Placement.Rotation.multVec(self.part.Ports[5])
+            return v / v.Length
+        else:
+            return  # Return None.
+
+    def getShiftLength(self):
+        """Return shift distance.
+
+        :return: Shift distance in Standard FreeCAD units (mm).
+        :return: 0.0 if the edit field is empty.
+        :return: None, if the text in the edit field could not be parsed.
+        """
+        txt = self.editShift.text()
+        if txt == "":
+            return 0.0
+        try:
+            return FreeCAD.Units.parseQuantity(txt).Value
+        except Exception as ex:
+            FreeCAD.Console.PrintWarning("Cannot parse the shift string.\n")
+            FreeCAD.Console.PrintWarning(str(ex) + "\n")
+            return None
+
+    def onApplyClicked(self):
+        self.saveInput()
+        R = self.getRotation()
+        sh_dir = self.getShiftDirection()
+        sh_len = self.getShiftLength()
+
+        if R is None or sh_dir is None or sh_len is None:
+            # Something went wrong, do nothing.
+            FreeCAD.Console.PrintWarning("Cannot dermine all movment parameters. Do nothing.\n")
+            return
+
+        # FreeCAD.Console.PrintMessage("Rotation: " + str(R) + "\n")
+        # FreeCAD.Console.PrintMessage("Shift direction: " + str(sh_dir) + "\n")
+        # FreeCAD.Console.PrintMessage("Shift length: " + str(sh_len) + "\n")
         self.part.Placement.Rotation = self.part.Placement.Rotation.multiply(R)
+        self.part.Placement.Base = self.part.Placement.Base + sh_len * sh_dir

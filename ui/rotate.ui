@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>382</width>
-    <height>274</height>
+    <width>338</width>
+    <height>371</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -23,10 +23,20 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Rotate around axis</string>
+   <string>Move around</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0" colspan="2">
+   <item row="15" column="1" colspan="2">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>experimental, the UI can change</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1" colspan="2">
     <widget class="QLabel" name="labelPartName">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -54,7 +64,7 @@
      </property>
     </widget>
    </item>
-   <item row="8" column="0" colspan="2">
+   <item row="12" column="1" colspan="2">
     <widget class="QLabel" name="labelInstructions">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -76,14 +86,7 @@
      </property>
     </widget>
    </item>
-   <item row="9" column="1">
-    <widget class="QPushButton" name="buttonApply">
-     <property name="text">
-      <string>Apply</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="0">
+   <item row="3" column="1">
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
       <widget class="QPushButton" name="buttonReverse">
@@ -139,6 +142,13 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="buttonZeroAngle">
+       <property name="text">
+        <string>Zero</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QLineEdit" name="editDegree">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -162,7 +172,7 @@
      </item>
     </layout>
    </item>
-   <item row="2" column="1" rowspan="2">
+   <item row="3" column="2" rowspan="2">
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
       <widget class="QGroupBox" name="groupBoxPorts">
@@ -306,239 +316,46 @@
      </item>
     </layout>
    </item>
+   <item row="5" column="1">
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>Shift:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="14" column="1" colspan="2">
+    <widget class="QPushButton" name="buttonApply">
+     <property name="text">
+      <string>Apply</string>
+     </property>
+    </widget>
+   </item>
+   <item row="11" column="1">
+    <widget class="QPushButton" name="buttonZeroLength">
+     <property name="text">
+      <string>Zero</string>
+     </property>
+    </widget>
+   </item>
+   <item row="11" column="2">
+    <widget class="QLineEdit" name="editShift">
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
   </layout>
   <zorder>labelInstructions</zorder>
   <zorder>labelPartName</zorder>
   <zorder>buttonApply</zorder>
   <zorder></zorder>
+  <zorder>label</zorder>
+  <zorder>label_2</zorder>
+  <zorder>buttonZeroLength</zorder>
+  <zorder>editShift</zorder>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>buttonApply</sender>
-   <signal>clicked()</signal>
-   <receiver>Dialog</receiver>
-   <slot>onApplyClicked()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>372</x>
-     <y>258</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>377</x>
-     <y>262</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radioX</sender>
-   <signal>clicked()</signal>
-   <receiver>Dialog</receiver>
-   <slot>onAxisRadioSelected()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>253</x>
-     <y>196</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>377</x>
-     <y>262</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radioY</sender>
-   <signal>clicked()</signal>
-   <receiver>Dialog</receiver>
-   <slot>onAxisRadioSelected()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>306</x>
-     <y>196</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>377</x>
-     <y>262</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radioZ</sender>
-   <signal>clicked()</signal>
-   <receiver>Dialog</receiver>
-   <slot>onAxisRadioSelected()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>358</x>
-     <y>196</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>330</x>
-     <y>262</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radioPort1</sender>
-   <signal>clicked()</signal>
-   <receiver>Dialog</receiver>
-   <slot>onPortRadioSelected()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>244</x>
-     <y>92</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>165</x>
-     <y>262</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radioPort2</sender>
-   <signal>clicked()</signal>
-   <receiver>Dialog</receiver>
-   <slot>onPortRadioSelected()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>284</x>
-     <y>92</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>280</x>
-     <y>0</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radioPort3</sender>
-   <signal>clicked()</signal>
-   <receiver>Dialog</receiver>
-   <slot>onPortRadioSelected()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>324</x>
-     <y>92</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>331</x>
-     <y>0</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radioPort4</sender>
-   <signal>clicked()</signal>
-   <receiver>Dialog</receiver>
-   <slot>onPortRadioSelected()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>244</x>
-     <y>121</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>258</x>
-     <y>262</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radioPort5</sender>
-   <signal>clicked()</signal>
-   <receiver>Dialog</receiver>
-   <slot>onPortRadioSelected()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>284</x>
-     <y>121</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>304</x>
-     <y>0</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radioPort6</sender>
-   <signal>clicked()</signal>
-   <receiver>Dialog</receiver>
-   <slot>onPortRadioSelected()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>324</x>
-     <y>121</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>336</x>
-     <y>262</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radioX</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>Dialog</receiver>
-   <slot>onAxisRadioSelected()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>253</x>
-     <y>196</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>129</x>
-     <y>262</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>buttonReverse</sender>
-   <signal>clicked()</signal>
-   <receiver>Dialog</receiver>
-   <slot>onReverseClicked()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>85</x>
-     <y>50</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>888</x>
-     <y>800</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>dialDegree</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>Dialog</receiver>
-   <slot>onDialDegreeChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>98</x>
-     <y>119</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>870</x>
-     <y>706</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>editDegree</sender>
-   <signal>editingFinished()</signal>
-   <receiver>Dialog</receiver>
-   <slot>onEditDegreeChanged()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>36</x>
-     <y>188</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>806</x>
-     <y>734</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
  <slots>
   <slot>onApplyClicked()</slot>
   <slot>onAxisRadioSelected()</slot>
