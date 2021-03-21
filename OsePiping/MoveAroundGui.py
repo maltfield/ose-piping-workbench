@@ -30,6 +30,7 @@ class SelObserver:
 
     def addSelection(self, doc, obj, sub, pnt):               # Selection object
         # doc is the name of the document.
+        FreeCAD.Console.PrintMessage("addSelection")
         self.panel.updatePart(FreeCAD.getDocument(doc))
 
     def removeSelection(self, doc, obj, sub):                # Delete the selected object
@@ -111,11 +112,11 @@ class MoveAroundPanel:
         self.dialDegree = form.findChild(QtGui.QDial, "dialDegree")
         self.buttonReverse = form.findChild(QtGui.QPushButton, "buttonReverse")
         self.buttonZeroAngle = form.findChild(QtGui.QPushButton, "buttonZeroAngle")
+        self.buttonApplyShift = form.findChild(QtGui.QPushButton, "buttonApplyShift")
 
         self.buttonZeroLength = form.findChild(QtGui.QPushButton, "buttonZeroLength")
         self.editShift = form.findChild(QtGui.QLineEdit, "editShift")
         self.buttonApplyRotate = form.findChild(QtGui.QPushButton, "buttonApplyRotate")
-        self.buttonApplyShift = form.findChild(QtGui.QPushButton, "buttonApplyShift")
 
     def setupUi(self):
         # Call it from OsePipingCommands after Gui.Control.showDialog(panel)
@@ -140,6 +141,7 @@ class MoveAroundPanel:
         # Only react to activ document.
         self.document = doc
         self.part = Gui.Selection.getSelectionEx()[-1].Object
+        self.updateWidgets()
 
     def updateWidgets(self):
         self.labelPartName.setText(self.part.Name)
