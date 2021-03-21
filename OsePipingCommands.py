@@ -39,7 +39,7 @@ import OsePiping.SweepElbowGui as SweepElbowGui
 import OsePiping.Piping as Piping
 import OsePiping.Modification as Modification
 import OsePiping.Port as Port
-import OsePiping.RotateGui as RotateGui
+import OsePiping.MoveAroundGui as MoveAroundGui
 
 
 class OsePiping_PipeClass():
@@ -293,18 +293,18 @@ class OsePiping_ConnectClass():
             and Modification.all_selected_parts_have_ports()
 
 
-class OsePiping_RotateClass():
+class OsePiping_MoveAroundClass():
     def GetResources(self):
         return {'Pixmap': OsePipingBase.ICON_PATH + '/Draft_Rotate.svg',  # the name of a svg file available in the resources
                 #                'Accel' : "Shift+S", # a default shortcut (optional)
-                'MenuText': "Rotate",
-                'ToolTip': "Rotate a Dodo-Part."}
+                'MenuText': "Move Around",
+                'ToolTip': "Move Around a Dodo-Part."}
 
     def Activated(self):
-        "Do something here when button is clicked"
+        # Do something here when button is clicked.
         if Gui.ActiveDocument is None:
             FreeCAD.newDocument()
-        panel = RotateGui.RotatePanel()
+        panel = MoveAroundGui.MoveAroundPanel()
         Gui.Control.showDialog(panel)
         panel.setupUi()
         return panel
@@ -324,4 +324,4 @@ Gui.addCommand('OsePiping_Tee', OsePiping_TeeClass())
 Gui.addCommand('OsePiping_Corner', OsePiping_CornerClass())
 Gui.addCommand('OsePiping_Cross', OsePiping_CrossClass())
 Gui.addCommand('OsePiping_Connect', OsePiping_ConnectClass())
-Gui.addCommand('OsePiping_Rotate', OsePiping_RotateClass())
+Gui.addCommand('OsePiping_MoveAround', OsePiping_MoveAroundClass())

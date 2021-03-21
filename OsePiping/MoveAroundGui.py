@@ -43,11 +43,11 @@ class SelObserver:
 
 
 # See https://github.com/yorikvanhavre/FreeCAD/blob/master/src/Mod/TemplatePyMod/TaskPanel.py
-class RotatePanel:
+class MoveAroundPanel:
     QSETTINGS_APPLICATION = "OSE piping workbench"
 
     def __init__(self):
-        self.ui = OsePipingBase.UI_PATH + "/rotate.ui"
+        self.ui = OsePipingBase.UI_PATH + "/move-around.ui"
         self.document = FreeCAD.activeDocument()
         self.part = Gui.Selection.getSelectionEx()[-1].Object
         self.selObserver = SelObserver(self)
@@ -114,12 +114,13 @@ class RotatePanel:
 
         self.buttonZeroLength = form.findChild(QtGui.QPushButton, "buttonZeroLength")
         self.editShift = form.findChild(QtGui.QLineEdit, "editShift")
-        self.buttonApply = form.findChild(QtGui.QPushButton, "buttonApply")
+        self.buttonApplyRotate = form.findChild(QtGui.QPushButton, "buttonApplyRotate")
+        self.buttonApplyShift = form.findChild(QtGui.QPushButton, "buttonApplyShift")
 
     def setupUi(self):
         # Call it from OsePipingCommands after Gui.Control.showDialog(panel)
         mw = self.getMainWindow()
-        form = mw.findChild(QtGui.QDialog, "RotatePanel")
+        form = mw.findChild(QtGui.QDialog, "MoveAroundPanel")
         self.setupChildWidgets(form)
         self.setupCallbacks()
 
@@ -160,7 +161,8 @@ class RotatePanel:
         QtCore.QObject.connect(self.radioZ, QtCore.SIGNAL("clicked()"), self.onAxisRadioSelected)
         QtCore.QObject.connect(self.buttonZeroLength, QtCore.SIGNAL("clicked()"), self.onZeroLengthClicked)
 
-        QtCore.QObject.connect(self.buttonApply, QtCore.SIGNAL("clicked()"), self.onApplyClicked)
+        QtCore.QObject.connect(self.buttonApplyRotate, QtCore.SIGNAL("clicked()"), self.onApplyRotateClicked)
+        QtCore.QObject.connect(self.buttonApplyShift, QtCore.SIGNAL("clicked()"), self.onApplyShiftClicked)
 
     def getMainWindow(self):
         "returns the main window"
@@ -175,7 +177,7 @@ class RotatePanel:
 
     def saveInput(self):
         """Store user input for the next run."""
-        settings = QtCore.QSettings(RotatePanel.QSETTINGS_APPLICATION, "Rotation")
+        settings = QtCore.QSettings(MoveAroundPanel.QSETTINGS_APPLICATION, "MoveAroundPanel")
 
         settings.setValue("radioPort1", self.radioPort1.isChecked())
         settings.setValue("radioPort2", self.radioPort2.isChecked())
@@ -194,7 +196,7 @@ class RotatePanel:
 
     def restoreInput(self):
         settings = QtCore.QSettings(
-            RotatePanel.QSETTINGS_APPLICATION, "Rotation")
+            MoveAroundPanel.QSETTINGS_APPLICATION, "MoveAroundPanel")
         # For some reasons settings.value("radioPort1", False) returns a string.
         # We convert it to boolean.
         self.radioPort1.setChecked(bool(settings.value("radioPort1", False)))
@@ -360,19 +362,28 @@ class RotatePanel:
             FreeCAD.Console.PrintWarning(str(ex) + "\n")
             return None
 
-    def onApplyClicked(self):
+    def onApplyRotateClicked(self):
         self.saveInput()
         R = self.getRotation()
-        sh_dir = self.getShiftDirection()
-        sh_len = self.getShiftLength()
 
-        if R is None or sh_dir is None or sh_len is None:
+        if R is None:
             # Something went wrong, do nothing.
-            FreeCAD.Console.PrintWarning("Cannot dermine all movment parameters. Do nothing.\n")
+            FreeCAD.Console.PrintWarning("Cannot dermine rotation parameters. Do nothing.\n")
             return
 
         # FreeCAD.Console.PrintMessage("Rotation: " + str(R) + "\n")
+        self.part.Placement.Rotation = self.part.Placement.Rotation.multiply(R)
+
+    def onApplyShiftClicked(self):
+        self.saveInput()
+        sh_dir = self.getShiftDirection()
+        sh_len = self.getShiftLength()
+
+        if sh_dir is None or sh_len is None:
+            # Something went wrong, do nothing.
+            FreeCAD.Console.PrintWarning("Cannot dermine all shift parameters. Do nothing.\n")
+            return
+
         # FreeCAD.Console.PrintMessage("Shift direction: " + str(sh_dir) + "\n")
         # FreeCAD.Console.PrintMessage("Shift length: " + str(sh_len) + "\n")
-        self.part.Placement.Rotation = self.part.Placement.Rotation.multiply(R)
         self.part.Placement.Base = self.part.Placement.Base + sh_len * sh_dir
