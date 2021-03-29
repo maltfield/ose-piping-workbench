@@ -51,7 +51,7 @@ class MoveAroundPanel:
         self.ui = OsePipingBase.UI_PATH + "/move-around.ui"
         self.document = FreeCAD.activeDocument()
         self.part = Gui.Selection.getSelectionEx()[-1].Object
-        self.port_i = self.getPortIndexOfSelection(Gui.Selection.getSelectionEx()[-1])
+        self.port_i = MoveAroundPanel.getPortIndexOfSelection(Gui.Selection.getSelectionEx()[-1])
         self.selObserver = SelObserver(self)
         Gui.Selection.addObserver(self.selObserver)
 
@@ -139,7 +139,8 @@ class MoveAroundPanel:
 
         self.updateWidgets()
 
-    def getPortIndexOfSelection(self, selection):
+    @staticmethod
+    def getPortIndexOfSelection(selection):
         """Estimate port index of a selected part."""
 
         if (len(selection.SubObjects) > 0):
@@ -157,7 +158,7 @@ class MoveAroundPanel:
         self.document = doc
         self.part = Gui.Selection.getSelectionEx()[-1].Object
         # Change selected port only if a port was selected.
-        port_i = self.getPortIndexOfSelection(Gui.Selection.getSelectionEx()[-1])
+        port_i = MoveAroundPanel.getPortIndexOfSelection(Gui.Selection.getSelectionEx()[-1])
         if port_i >= 0:
             self.port_i = port_i
         self.updateWidgets()
@@ -295,7 +296,8 @@ class MoveAroundPanel:
 
         return: Rotation matrix or None.
         """
-        nports = len(self.part.Ports)
+        ports = Port.extractAdvancedPorts(self.part)
+        nports = len(ports)
 
         angle = self.dialDegree.value()
         if self.radioX.isChecked():
@@ -306,7 +308,7 @@ class MoveAroundPanel:
             return FreeCAD.Rotation(FreeCAD.Vector(0, 0, 1), angle)
 
         if 0 <= self.port_i < nports:
-            return FreeCAD.Rotation(self.part.Ports[self.port_i], angle)
+            return FreeCAD.Rotation(ports[self.port_i].getNormal(), angle)
 
         return  # Return None.
 
@@ -317,7 +319,6 @@ class MoveAroundPanel:
         :return: None, if the directon could not be determined.
         """
         ports = Port.extractAdvancedPorts(self.part)
-
         nports = len(ports)
 
         if self.radioX.isChecked():
