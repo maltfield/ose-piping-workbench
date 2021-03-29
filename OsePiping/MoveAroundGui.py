@@ -51,6 +51,7 @@ class MoveAroundPanel:
         self.ui = OsePipingBase.UI_PATH + "/move-around.ui"
         self.document = FreeCAD.activeDocument()
         self.part = Gui.Selection.getSelectionEx()[-1].Object
+        self.port_i = self.getPortIndexOfSelection(Gui.Selection.getSelectionEx()[-1])
         self.selObserver = SelObserver(self)
         Gui.Selection.addObserver(self.selObserver)
 
@@ -138,15 +139,32 @@ class MoveAroundPanel:
 
         self.updateWidgets()
 
+    def getPortIndexOfSelection(self, selection):
+        """Estimate port index of a selected part."""
+
+        if (len(selection.SubObjects) > 0):
+            # Only a pipe has ports on creation. The other fitting can be accessed only through their objects.
+            part = selection.Object
+            sub = selection.SubObjects[-1]
+            ports = Port.extractAdvancedPorts(part)
+            i = Port.getNearestPortIndex(part.Placement, ports, sub.CenterOfMass)
+            FreeCAD.Console.PrintMessage("Select Port {}\n".format(i + 1))
+            return i
+        return -1
+
     def updatePart(self, doc):
         # Only react to activ document.
         self.document = doc
         self.part = Gui.Selection.getSelectionEx()[-1].Object
+        # Change selected port only if a port was selected.
+        port_i = self.getPortIndexOfSelection(Gui.Selection.getSelectionEx()[-1])
+        if port_i >= 0:
+            self.port_i = port_i
         self.updateWidgets()
 
     def updateWidgets(self):
         self.labelPartName.setText(self.part.Name)
-        self.showPorts(self.part)
+        self.showPorts(self.part, self.port_i)
 
     def setupCallbacks(self):
         QtCore.QObject.connect(self.buttonReverse, QtCore.SIGNAL("clicked()"), self.onReverseClicked)
@@ -205,24 +223,27 @@ class MoveAroundPanel:
         return False
 
     def restoreInput(self):
-        settings = QtCore.QSettings(
-            MoveAroundPanel.QSETTINGS_APPLICATION, "MoveAroundPanel")
-        self.radioPorts[0].setChecked(MoveAroundPanel.isTrue(settings.value("radioPort1", False)))
-        self.radioPorts[1].setChecked(MoveAroundPanel.isTrue(settings.value("radioPort2", False)))
-        self.radioPorts[2].setChecked(MoveAroundPanel.isTrue(settings.value("radioPort3", False)))
-        self.radioPorts[3].setChecked(MoveAroundPanel.isTrue(settings.value("radioPort4", False)))
-        self.radioPorts[4].setChecked(MoveAroundPanel.isTrue(settings.value("radioPort5", False)))
-        self.radioPorts[5].setChecked(MoveAroundPanel.isTrue(settings.value("radioPort6", False)))
+        settings = QtCore.QSettings(MoveAroundPanel.QSETTINGS_APPLICATION, "MoveAroundPanel")
+        # Restore only Input if no valid port is selected on initialization.
+        if self.port_i < 0:
+            self.radioPorts[0].setChecked(MoveAroundPanel.isTrue(settings.value("radioPort1", False)))
+            self.radioPorts[1].setChecked(MoveAroundPanel.isTrue(settings.value("radioPort2", False)))
+            self.radioPorts[2].setChecked(MoveAroundPanel.isTrue(settings.value("radioPort3", False)))
+            self.radioPorts[3].setChecked(MoveAroundPanel.isTrue(settings.value("radioPort4", False)))
+            self.radioPorts[4].setChecked(MoveAroundPanel.isTrue(settings.value("radioPort5", False)))
+            self.radioPorts[5].setChecked(MoveAroundPanel.isTrue(settings.value("radioPort6", False)))
+            self.onPortRadioSelected()
 
-        self.radioX.setChecked(MoveAroundPanel.isTrue(settings.value("radioX", False)))
-        self.radioY.setChecked(MoveAroundPanel.isTrue(settings.value("radioY", False)))
-        self.radioZ.setChecked(MoveAroundPanel.isTrue(settings.value("radioZ", False)))
+            self.radioX.setChecked(MoveAroundPanel.isTrue(settings.value("radioX", False)))
+            self.radioY.setChecked(MoveAroundPanel.isTrue(settings.value("radioY", False)))
+            self.radioZ.setChecked(MoveAroundPanel.isTrue(settings.value("radioZ", False)))
+            self.onAxisRadioSelected()
 
         self.editDegree.setText(settings.value("editDegree", "0"))
         self.editShift.setText(settings.value("editShift", "0mm"))
         self.onEditDegreeChanged()
 
-    def showPorts(self, part):
+    def showPorts(self, part, port_i):
         if Port.supportsAdvancedPort(part):
             nports = len(part.Ports)
         else:
@@ -233,11 +254,18 @@ class MoveAroundPanel:
         for i in range(nports, len(self.radioPorts)):
             self.radioPorts[i].setEnabled(False)
 
+        if port_i >= 0:
+            self.radioPorts[port_i].setChecked(True)
+
     def onPortRadioSelected(self):
-        pass
+        for i in range(0, 6):
+            if self.radioPorts[i].isChecked():
+                self.port_i = i
+                FreeCAD.Console.PrintWarning("onPortRadioSelected Selected Port {}.\n".format(self.port_i + 1))
 
     def onAxisRadioSelected(self):
-        pass
+        if self.radioX.isChecked() or self.radioY.isChecked() or self.radioZ.isChecked():
+            self.port_i = -1
 
     def onDialDegreeChanged(self):
         self.editDegree.setText(str(self.dialDegree.value()))
@@ -277,9 +305,8 @@ class MoveAroundPanel:
         elif self.radioZ.isChecked():
             return FreeCAD.Rotation(FreeCAD.Vector(0, 0, 1), angle)
 
-        for i in range(0, nports):
-            if self.radioPorts[i].isChecked():
-                return FreeCAD.Rotation(self.part.Ports[i], angle)
+        if 0 <= self.port_i < nports:
+            return FreeCAD.Rotation(self.part.Ports[self.port_i], angle)
 
         return  # Return None.
 
@@ -300,13 +327,12 @@ class MoveAroundPanel:
         elif self.radioZ.isChecked():
             return FreeCAD.Vector(0, 0, 1)
 
-        for i in range(0, nports):
-            if self.radioPorts[i].isChecked():
-                # Move towards the normal of the Port.
-                # Take in account the current rotation
-                # of the part.
-                v = self.part.Placement.Rotation.multVec(ports[i].getNormal())
-                return v / v.Length
+        if 0 <= self.port_i < nports:
+            # Move towards the normal of the Port.
+            # Take in account the current rotation
+            # of the part.
+            v = self.part.Placement.Rotation.multVec(ports[self.port_i].getNormal())
+            return v / v.Length
         return  # Return None.
 
     def getShiftLength(self):

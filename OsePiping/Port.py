@@ -132,4 +132,8 @@ def getNearestPort(part_placement, ports, point):
     return closest_port
 
 
+def getNearestPortIndex(part_placement, ports, point):
+    closest_port = getNearestPort(part_placement, ports, point)
+    return ports.index(closest_port)
+
 # testPorts()
