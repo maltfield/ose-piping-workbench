@@ -295,10 +295,10 @@ class OsePiping_ConnectClass():
 
 class OsePiping_MoveAroundClass():
     def GetResources(self):
-        return {'Pixmap': OsePipingBase.ICON_PATH + '/Draft_Rotate.svg',  # the name of a svg file available in the resources
+        return {'Pixmap': OsePipingBase.ICON_PATH + '/MoveAround.svg',  # the name of a svg file available in the resources
                 #                'Accel' : "Shift+S", # a default shortcut (optional)
                 'MenuText': "Move Around",
-                'ToolTip': "Move Around a Dodo-Part."}
+                'ToolTip': "Move around a Dodo-part."}
 
     def Activated(self):
         # Do something here when button is clicked.
