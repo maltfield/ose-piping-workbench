@@ -99,12 +99,13 @@ class MoveAroundPanel:
         Is here a faster way to do this task?
         """
         self.labelPartName = form.findChild(QtGui.QLabel, "labelPartName")
-        self.radioPort1 = form.findChild(QtGui.QRadioButton, "radioPort1")
-        self.radioPort2 = form.findChild(QtGui.QRadioButton, "radioPort2")
-        self.radioPort3 = form.findChild(QtGui.QRadioButton, "radioPort3")
-        self.radioPort4 = form.findChild(QtGui.QRadioButton, "radioPort4")
-        self.radioPort5 = form.findChild(QtGui.QRadioButton, "radioPort5")
-        self.radioPort6 = form.findChild(QtGui.QRadioButton, "radioPort6")
+        self.radioPorts = []
+        self.radioPorts.append(form.findChild(QtGui.QRadioButton, "radioPort1"))
+        self.radioPorts.append(form.findChild(QtGui.QRadioButton, "radioPort2"))
+        self.radioPorts.append(form.findChild(QtGui.QRadioButton, "radioPort3"))
+        self.radioPorts.append(form.findChild(QtGui.QRadioButton, "radioPort4"))
+        self.radioPorts.append(form.findChild(QtGui.QRadioButton, "radioPort5"))
+        self.radioPorts.append(form.findChild(QtGui.QRadioButton, "radioPort6"))
         self.radioX = form.findChild(QtGui.QRadioButton, "radioX")
         self.radioY = form.findChild(QtGui.QRadioButton, "radioY")
         self.radioZ = form.findChild(QtGui.QRadioButton, "radioZ")
@@ -152,12 +153,8 @@ class MoveAroundPanel:
         QtCore.QObject.connect(self.dialDegree, QtCore.SIGNAL("valueChanged(int)"), self.onDialDegreeChanged)
         QtCore.QObject.connect(self.buttonZeroAngle, QtCore.SIGNAL("clicked()"), self.onZeroAngleClicked)
         QtCore.QObject.connect(self.editDegree, QtCore.SIGNAL("editingFinished()"), self.onEditDegreeChanged)
-        QtCore.QObject.connect(self.radioPort1, QtCore.SIGNAL("clicked()"), self.onPortRadioSelected)
-        QtCore.QObject.connect(self.radioPort2, QtCore.SIGNAL("clicked()"), self.onPortRadioSelected)
-        QtCore.QObject.connect(self.radioPort3, QtCore.SIGNAL("clicked()"), self.onPortRadioSelected)
-        QtCore.QObject.connect(self.radioPort4, QtCore.SIGNAL("clicked()"), self.onPortRadioSelected)
-        QtCore.QObject.connect(self.radioPort5, QtCore.SIGNAL("clicked()"), self.onPortRadioSelected)
-        QtCore.QObject.connect(self.radioPort6, QtCore.SIGNAL("clicked()"), self.onPortRadioSelected)
+        for radioPort in self.radioPorts:
+            QtCore.QObject.connect(radioPort, QtCore.SIGNAL("clicked()"), self.onPortRadioSelected)
         QtCore.QObject.connect(self.radioX, QtCore.SIGNAL("clicked()"), self.onAxisRadioSelected)
         QtCore.QObject.connect(self.radioY, QtCore.SIGNAL("clicked()"), self.onAxisRadioSelected)
         QtCore.QObject.connect(self.radioZ, QtCore.SIGNAL("clicked()"), self.onAxisRadioSelected)
@@ -181,12 +178,12 @@ class MoveAroundPanel:
         """Store user input for the next run."""
         settings = QtCore.QSettings(MoveAroundPanel.QSETTINGS_APPLICATION, "MoveAroundPanel")
 
-        settings.setValue("radioPort1", self.radioPort1.isChecked())
-        settings.setValue("radioPort2", self.radioPort2.isChecked())
-        settings.setValue("radioPort3", self.radioPort3.isChecked())
-        settings.setValue("radioPort4", self.radioPort4.isChecked())
-        settings.setValue("radioPort5", self.radioPort5.isChecked())
-        settings.setValue("radioPort6", self.radioPort6.isChecked())
+        settings.setValue("radioPort1", self.radioPorts[0].isChecked())
+        settings.setValue("radioPort2", self.radioPorts[1].isChecked())
+        settings.setValue("radioPort3", self.radioPorts[2].isChecked())
+        settings.setValue("radioPort4", self.radioPorts[3].isChecked())
+        settings.setValue("radioPort5", self.radioPorts[4].isChecked())
+        settings.setValue("radioPort6", self.radioPorts[5].isChecked())
 
         settings.setValue("radioX", self.radioX.isChecked())
         settings.setValue("radioY", self.radioY.isChecked())
@@ -196,21 +193,30 @@ class MoveAroundPanel:
         settings.setValue("editShift", str(self.editShift.text()))
         settings.sync()
 
+    @staticmethod
+    def isTrue(v):
+        # For some reasons settings.value("radioPort1", False) returns a string.
+        # "true" or "false" if radioPort1 was previously saved.
+        # We convert it to boolean.
+        # note bool("false") is True. That is why we will use == "true" instead.
+        # Just in case, I added also a comparison with True and "True".
+        if v is True or v == 'True' or v == 'true':
+            return True
+        return False
+
     def restoreInput(self):
         settings = QtCore.QSettings(
             MoveAroundPanel.QSETTINGS_APPLICATION, "MoveAroundPanel")
-        # For some reasons settings.value("radioPort1", False) returns a string.
-        # We convert it to boolean.
-        self.radioPort1.setChecked(bool(settings.value("radioPort1", False)))
-        self.radioPort2.setChecked(bool(settings.value("radioPort2", False)))
-        self.radioPort3.setChecked(bool(settings.value("radioPort3", False)))
-        self.radioPort4.setChecked(bool(settings.value("radioPort4", False)))
-        self.radioPort5.setChecked(bool(settings.value("radioPort5", False)))
-        self.radioPort6.setChecked(bool(settings.value("radioPort6", False)))
+        self.radioPorts[0].setChecked(MoveAroundPanel.isTrue(settings.value("radioPort1", False)))
+        self.radioPorts[1].setChecked(MoveAroundPanel.isTrue(settings.value("radioPort2", False)))
+        self.radioPorts[2].setChecked(MoveAroundPanel.isTrue(settings.value("radioPort3", False)))
+        self.radioPorts[3].setChecked(MoveAroundPanel.isTrue(settings.value("radioPort4", False)))
+        self.radioPorts[4].setChecked(MoveAroundPanel.isTrue(settings.value("radioPort5", False)))
+        self.radioPorts[5].setChecked(MoveAroundPanel.isTrue(settings.value("radioPort6", False)))
 
-        self.radioX.setChecked(bool(settings.value("radioX", False)))
-        self.radioY.setChecked(bool(settings.value("radioY", False)))
-        self.radioZ.setChecked(bool(settings.value("radioZ", False)))
+        self.radioX.setChecked(MoveAroundPanel.isTrue(settings.value("radioX", False)))
+        self.radioY.setChecked(MoveAroundPanel.isTrue(settings.value("radioY", False)))
+        self.radioZ.setChecked(MoveAroundPanel.isTrue(settings.value("radioZ", False)))
 
         self.editDegree.setText(settings.value("editDegree", "0"))
         self.editShift.setText(settings.value("editShift", "0mm"))
@@ -222,35 +228,10 @@ class MoveAroundPanel:
         else:
             nports = 0
 
-        if nports >= 1:
-            self.radioPort1.setEnabled(True)
-        else:
-            self.radioPort1.setEnabled(False)
-
-        if nports >= 2:
-            self.radioPort2.setEnabled(True)
-        else:
-            self.radioPort2.setEnabled(False)
-
-        if nports >= 3:
-            self.radioPort3.setEnabled(True)
-        else:
-            self.radioPort3.setEnabled(False)
-
-        if nports >= 4:
-            self.radioPort4.setEnabled(True)
-        else:
-            self.radioPort4.setEnabled(False)
-
-        if nports >= 5:
-            self.radioPort5.setEnabled(True)
-        else:
-            self.radioPort5.setEnabled(False)
-
-        if nports >= 6:
-            self.radioPort6.setEnabled(True)
-        else:
-            self.radioPort6.setEnabled(False)
+        for i in range(0, nports):
+            self.radioPorts[i].setEnabled(True)
+        for i in range(nports, len(self.radioPorts)):
+            self.radioPorts[i].setEnabled(False)
 
     def onPortRadioSelected(self):
         pass
@@ -295,20 +276,12 @@ class MoveAroundPanel:
             return FreeCAD.Rotation(FreeCAD.Vector(0, 1, 0), angle)
         elif self.radioZ.isChecked():
             return FreeCAD.Rotation(FreeCAD.Vector(0, 0, 1), angle)
-        elif self.radioPort1.isChecked() and nports >= 1:
-            return FreeCAD.Rotation(self.part.Ports[0], angle)
-        elif self.radioPort2.isChecked() and nports >= 2:
-            return FreeCAD.Rotation(self.part.Ports[1], angle)
-        elif self.radioPort3.isChecked() and nports >= 3:
-            return FreeCAD.Rotation(self.part.Ports[2], angle)
-        elif self.radioPort4.isChecked() and nports >= 4:
-            return FreeCAD.Rotation(self.part.Ports[3], angle)
-        elif self.radioPort5.isChecked() and nports >= 5:
-            return FreeCAD.Rotation(self.part.Ports[4], angle)
-        elif self.radioPort6.isChecked() and nports >= 6:
-            return FreeCAD.Rotation(self.part.Ports[5], angle)
-        else:
-            return  # Return None.
+
+        for i in range(0, nports):
+            if self.radioPorts[i].isChecked():
+                return FreeCAD.Rotation(self.part.Ports[i], angle)
+
+        return  # Return None.
 
     def getShiftDirection(self):
         """Return shift direction as a normalized Vector.
@@ -316,7 +289,9 @@ class MoveAroundPanel:
         :return: Shift direction as a Vector.
         :return: None, if the directon could not be determined.
         """
-        nports = len(self.part.Ports)
+        ports = Port.extractAdvancedPorts(self.part)
+
+        nports = len(ports)
 
         if self.radioX.isChecked():
             return FreeCAD.Vector(1, 0, 0)
@@ -324,28 +299,15 @@ class MoveAroundPanel:
             return FreeCAD.Vector(0, 1, 0)
         elif self.radioZ.isChecked():
             return FreeCAD.Vector(0, 0, 1)
-        elif self.radioPort1.isChecked() and nports >= 1:
-            # Move towards the Port. Take in account the current rotation
-            # of the part.
-            v = self.part.Placement.Rotation.multVec(self.part.Ports[0])
-            return v / v.Length
-        elif self.radioPort2.isChecked() and nports >= 2:
-            v = self.part.Placement.Rotation.multVec(self.part.Ports[1])
-            return v / v.Length
-        elif self.radioPort3.isChecked() and nports >= 3:
-            v = self.part.Placement.Rotation.multVec(self.part.Ports[2])
-            return v / v.Length
-        elif self.radioPort4.isChecked() and nports >= 4:
-            v = self.part.Placement.Rotation.multVec(self.part.Ports[3])
-            return v / v.Length
-        elif self.radioPort5.isChecked() and nports >= 5:
-            v = self.part.Placement.Rotation.multVec(self.part.Ports[4])
-            return v / v.Length
-        elif self.radioPort6.isChecked() and nports >= 6:
-            v = self.part.Placement.Rotation.multVec(self.part.Ports[5])
-            return v / v.Length
-        else:
-            return  # Return None.
+
+        for i in range(0, nports):
+            if self.radioPorts[i].isChecked():
+                # Move towards the normal of the Port.
+                # Take in account the current rotation
+                # of the part.
+                v = self.part.Placement.Rotation.multVec(ports[i].getNormal())
+                return v / v.Length
+        return  # Return None.
 
     def getShiftLength(self):
         """Return shift distance.
