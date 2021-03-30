@@ -50,7 +50,7 @@ class OsePipingWorkbench (Workbench):
         self.appendMenu("Command Menu", self.partList)  # creates a new menu
 
         # Add commands to connect and rotate parts.
-        self.modificationList = ["OsePiping_MoveTo", "OsePiping_MoveAround"]
+        self.modificationList = ["OsePiping_MoveAround", "OsePiping_MoveTo"]
         self.appendToolbar("Modification", self.modificationList)
         self.appendMenu("Modification", self.modificationList)  # creates a new menu
         #OSE_PipingWorkbench.Icon = os.path.join(OSEBase.ICON_PATH,"Workbench.svg")

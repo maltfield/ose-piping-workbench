@@ -30,7 +30,6 @@ class SelObserver:
 
     def addSelection(self, doc, obj, sub, pnt):               # Selection object
         # doc is the name of the document.
-        FreeCAD.Console.PrintMessage("addSelection")
         self.panel.updatePart(FreeCAD.getDocument(doc))
 
     def removeSelection(self, doc, obj, sub):                # Delete the selected object
@@ -57,16 +56,17 @@ class MoveAroundPanel:
 
     def accept(self):
         # It is not called, because we do not show "OK"-Button.
-        FreeCAD.Console.PrintMessage("accept")
+        # FreeCAD.Console.PrintMessage("accept")
         self.document.recompute()
         Gui.Selection.removeObserver(self.selObserver)
         self.saveInput()
         return True
 
     def reject(self):
-        FreeCAD.Console.PrintMessage("reject")
+        # FreeCAD.Console.PrintMessage("reject")
         self.document.recompute()
         Gui.Selection.removeObserver(self.selObserver)
+        self.saveInput()
         return True
 
     def clicked(self, index):
@@ -156,15 +156,25 @@ class MoveAroundPanel:
     def updatePart(self, doc):
         # Only react to activ document.
         self.document = doc
-        self.part = Gui.Selection.getSelectionEx()[-1].Object
-        # Change selected port only if a port was selected.
-        port_i = MoveAroundPanel.getPortIndexOfSelection(Gui.Selection.getSelectionEx()[-1])
-        if port_i >= 0:
-            self.port_i = port_i
+        nsel = len(Gui.Selection.getSelectionEx())
+        if nsel >= 1:
+            self.part = Gui.Selection.getSelectionEx()[-1].Object
+            # Change selected port only if a port was selected.
+            port_i = MoveAroundPanel.getPortIndexOfSelection(Gui.Selection.getSelectionEx()[-1])
+            if port_i >= 0:
+                self.port_i = port_i
+        else:
+            FreeCAD.Console.PrintMessage("No part selected.\n")
+            self.part = None
+
         self.updateWidgets()
 
     def updateWidgets(self):
-        self.labelPartName.setText(self.part.Name)
+        if self.part is not None:
+            self.labelPartName.setText(self.part.Name)
+        else:
+            self.labelPartName.setText("Select part to move.")
+
         self.showPorts(self.part, self.port_i)
 
     def setupCallbacks(self):
@@ -245,7 +255,7 @@ class MoveAroundPanel:
         self.onEditDegreeChanged()
 
     def showPorts(self, part, port_i):
-        if Port.supportsAdvancedPort(part):
+        if part is not None and Port.supportsAdvancedPort(part):
             nports = len(part.Ports)
         else:
             nports = 0
@@ -262,7 +272,7 @@ class MoveAroundPanel:
         for i in range(0, 6):
             if self.radioPorts[i].isChecked():
                 self.port_i = i
-                FreeCAD.Console.PrintWarning("onPortRadioSelected Selected Port {}.\n".format(self.port_i + 1))
+                # FreeCAD.Console.PrintWarning("onPortRadioSelected Selected Port {}.\n".format(self.port_i + 1))
 
     def onAxisRadioSelected(self):
         if self.radioX.isChecked() or self.radioY.isChecked() or self.radioZ.isChecked():
@@ -296,6 +306,9 @@ class MoveAroundPanel:
 
         return: Rotation matrix or None.
         """
+        if self.part is None:
+            return None
+
         ports = Port.extractAdvancedPorts(self.part)
         nports = len(ports)
 
@@ -318,6 +331,9 @@ class MoveAroundPanel:
         :return: Shift direction as a Vector.
         :return: None, if the directon could not be determined.
         """
+        if self.part is None:
+            return None
+
         ports = Port.extractAdvancedPorts(self.part)
         nports = len(ports)
 
