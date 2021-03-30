@@ -147,10 +147,11 @@ class MoveAroundPanel:
             # Only a pipe has ports on creation. The other fitting can be accessed only through their objects.
             part = selection.Object
             sub = selection.SubObjects[-1]
-            ports = Port.extractAdvancedPorts(part)
-            i = Port.getNearestPortIndex(part.Placement, ports, sub.CenterOfMass)
-            FreeCAD.Console.PrintMessage("Select Port {}\n".format(i + 1))
-            return i
+            ports = MoveAroundPanel.getPorts(part)
+            if len(ports) > 0:
+                i = Port.getNearestPortIndex(part.Placement, ports, sub.CenterOfMass)
+                FreeCAD.Console.PrintMessage("Select Port {}\n".format(i + 1))
+                return i
         return -1
 
     def updatePart(self, doc):
@@ -164,7 +165,7 @@ class MoveAroundPanel:
             if port_i >= 0:
                 self.port_i = port_i
         else:
-            FreeCAD.Console.PrintMessage("No part selected.\n")
+            FreeCAD.Console.PrintMessage("No part is selected.\n")
             self.part = None
 
         self.updateWidgets()
@@ -297,6 +298,13 @@ class MoveAroundPanel:
     def onZeroLengthClicked(self):
         self.editShift.setText("0mm")
 
+    @staticmethod
+    def getPorts(part):
+        if Port.supportsAdvancedPort(part):
+            return Port.extractAdvancedPorts(part)
+        else:
+            return []
+
     def getRotation(self):
         """Return rotation vector.
 
@@ -309,7 +317,7 @@ class MoveAroundPanel:
         if self.part is None:
             return None
 
-        ports = Port.extractAdvancedPorts(self.part)
+        ports = MoveAroundPanel.getPorts(self.part)
         nports = len(ports)
 
         angle = self.dialDegree.value()
@@ -334,7 +342,7 @@ class MoveAroundPanel:
         if self.part is None:
             return None
 
-        ports = Port.extractAdvancedPorts(self.part)
+        ports = MoveAroundPanel.getPorts(self.part)
         nports = len(ports)
 
         if self.radioX.isChecked():
@@ -369,8 +377,11 @@ class MoveAroundPanel:
             FreeCAD.Console.PrintWarning(str(ex) + "\n")
             return None
 
+
+
     def onApplyRotateClicked(self):
         self.saveInput()
+
         R = self.getRotation()
 
         if R is None:
@@ -383,6 +394,7 @@ class MoveAroundPanel:
 
     def onApplyShiftClicked(self):
         self.saveInput()
+
         sh_dir = self.getShiftDirection()
         sh_len = self.getShiftLength()
 
