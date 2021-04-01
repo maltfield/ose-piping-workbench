@@ -40,6 +40,7 @@ import OsePiping.Piping as Piping
 import OsePiping.Modification as Modification
 import OsePiping.Port as Port
 import OsePiping.MoveAroundGui as MoveAroundGui
+import OsePiping.MoveToGui as MoveToGui
 
 
 class OsePiping_PipeClass():
@@ -240,9 +241,9 @@ class OsePiping_CrossClass():
         return True
 
 
-class OsePiping_ConnectClass():
+class OsePiping_MoveToClass():
     def GetResources(self):
-        return {'Pixmap': OsePipingBase.ICON_PATH + '/Draft_Move.svg',  # the name of a svg file available in the resources
+        return {'Pixmap': OsePipingBase.ICON_PATH + '/MoveTo.svg',  # the name of a svg file available in the resources
                 #                'Accel' : "Shift+S", # a default shortcut (optional)
                 'MenuText': "Move",
                 'ToolTip': "Move one Dodo-part to another Dodo-part."}
@@ -270,20 +271,25 @@ class OsePiping_ConnectClass():
         # Move next to last object to the last object.
         dest_sel = Gui.Selection.getSelectionEx()[-1]
         movable_sel = Gui.Selection.getSelectionEx()[-2]
-        FreeCAD.Console.PrintMessage("Trying to connect {} to {}...\n".format(
-                movable_sel.Object.Name, dest_sel.Object.Name))
+        FreeCAD.Console.PrintMessage("Trying to move {} to {}...\n".format(
+                                     movable_sel.Object.Name, dest_sel.Object.Name))
 
-        if len(dest_sel.SubObjects) == 0:
-            FreeCAD.Console.PrintWarning("Select a surface or an edge for a destination port.\n")
-            return
-        if len(movable_sel.SubObjects) == 0:
-            FreeCAD.Console.PrintWarning("Select a surface or on edge of a movable part.\n")
-            return
+#        if len(dest_sel.SubObjects) == 0:
+#            FreeCAD.Console.PrintWarning("Select a surface or an edge for a destination port.\n")
+#            return
+#        if len(movable_sel.SubObjects) == 0:
+#            FreeCAD.Console.PrintWarning("Select a surface or on edge of a movable part.\n")
+#            return
 
-        dest_port = self.getPort(dest_sel)
-        moveble_port = self.getPort(movable_sel)
+#        dest_port = self.getPort(dest_sel)
+#        moveble_port = self.getPort(movable_sel)
 
-        movable_sel.Object.Placement = moveble_port.getPartPlacement(dest_sel.Object.Placement, dest_port)
+#        movable_sel.Object.Placement = moveble_port.getPartPlacement(dest_sel.Object.Placement, dest_port)
+
+        panel = MoveToGui.MoveToPanel()
+        Gui.Control.showDialog(panel)
+        panel.setupUi()
+        return panel
 
     def IsActive(self):
         """Here you can define if the command must be active or not (greyed) if certain conditions
@@ -324,4 +330,4 @@ Gui.addCommand('OsePiping_Tee', OsePiping_TeeClass())
 Gui.addCommand('OsePiping_Corner', OsePiping_CornerClass())
 Gui.addCommand('OsePiping_Cross', OsePiping_CrossClass())
 Gui.addCommand('OsePiping_MoveAround', OsePiping_MoveAroundClass())
-#Gui.addCommand('OsePiping_MoveTo', OsePiping_MoveToClass())
+Gui.addCommand('OsePiping_MoveTo', OsePiping_MoveToClass())
