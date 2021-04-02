@@ -30,8 +30,8 @@
        <rect>
         <x>10</x>
         <y>0</y>
-        <width>263</width>
-        <height>58</height>
+        <width>351</width>
+        <height>61</height>
        </rect>
       </property>
       <property name="title">
@@ -52,22 +52,22 @@
         </widget>
        </item>
        <item>
+        <widget class="QRadioButton" name="radioButtonParts">
+         <property name="text">
+          <string>Parts</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QRadioButton" name="radioButtonFlamingo">
          <property name="enabled">
           <bool>false</bool>
          </property>
          <property name="text">
-          <string>Flamingo</string>
+          <string>Flamingo (depricated)</string>
          </property>
          <property name="checked">
           <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QRadioButton" name="radioButtonParts">
-         <property name="text">
-          <string>Parts</string>
          </property>
         </widget>
        </item>
@@ -130,10 +130,20 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayoutWithTable">
+    <layout class="QVBoxLayout" name="verticalLayoutWithTable">
      <property name="bottomMargin">
       <number>19</number>
      </property>
+     <item>
+      <widget class="QTableView" name="tableViewParts">
+       <property name="selectionMode">
+        <enum>QAbstractItemView::SingleSelection</enum>
+       </property>
+       <property name="selectionBehavior">
+        <enum>QAbstractItemView::SelectRows</enum>
+       </property>
+      </widget>
+     </item>
      <item>
       <widget class="QLabel" name="labelImage">
        <property name="text">
@@ -144,16 +154,6 @@
        </property>
        <property name="alignment">
         <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QTableView" name="tableViewParts">
-       <property name="selectionMode">
-        <enum>QAbstractItemView::SingleSelection</enum>
-       </property>
-       <property name="selectionBehavior">
-        <enum>QAbstractItemView::SelectRows</enum>
        </property>
       </widget>
      </item>
@@ -187,7 +187,6 @@
  <tabstops>
   <tabstop>radioButtonSolid</tabstop>
   <tabstop>radioButtonFlamingo</tabstop>
-  <tabstop>radioButtonParts</tabstop>
   <tabstop>lineEditLength</tabstop>
   <tabstop>buttonBox</tabstop>
  </tabstops>
