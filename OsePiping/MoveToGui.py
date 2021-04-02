@@ -453,7 +453,6 @@ class MoveToPanel:
             #FreeCAD.Console.PrintMessage("New placement {}.\n".format(part.Placement))
 
     def onApplyClicked(self):
-
         self.saveInput()
         R = self.getRotation()
         gap_len = self.getGapLength()

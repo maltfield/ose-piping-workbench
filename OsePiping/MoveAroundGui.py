@@ -99,6 +99,8 @@ class MoveAroundPanel:
 
         Is here a faster way to do this task?
         """
+        self.buttonUnselectAll = form.findChild(QtGui.QPushButton, "buttonUnselectAll")
+
         self.labelPartName = form.findChild(QtGui.QLabel, "labelPartName")
         self.radioPorts = []
         self.radioPorts.append(form.findChild(QtGui.QRadioButton, "radioPort1"))
@@ -179,6 +181,8 @@ class MoveAroundPanel:
         self.showPorts(self.part, self.port_i)
 
     def setupCallbacks(self):
+        QtCore.QObject.connect(self.buttonUnselectAll, QtCore.SIGNAL("clicked()"), self.onUnselectAllClicked)
+
         QtCore.QObject.connect(self.buttonReverse, QtCore.SIGNAL("clicked()"), self.onReverseClicked)
         QtCore.QObject.connect(self.dialDegree, QtCore.SIGNAL("valueChanged(int)"), self.onDialDegreeChanged)
         QtCore.QObject.connect(self.buttonZeroAngle, QtCore.SIGNAL("clicked()"), self.onZeroAngleClicked)
@@ -406,3 +410,7 @@ class MoveAroundPanel:
         # FreeCAD.Console.PrintMessage("Shift direction: " + str(sh_dir) + "\n")
         # FreeCAD.Console.PrintMessage("Shift length: " + str(sh_len) + "\n")
         self.part.Placement.Base = self.part.Placement.Base + sh_len * sh_dir
+
+    def onUnselectAllClicked(self):
+        if self.document != None:
+            Gui.Selection.clearSelection(self.document.Name)
