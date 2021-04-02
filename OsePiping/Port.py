@@ -35,7 +35,7 @@ class AdvancedPort:
         # Rotat itself back, such that normal points to x axis and angle reference
         # r points to y axis.
         A_inv = self.placement.Rotation.inverted()
-        print("A_inv " + str(A_inv.toEuler()))
+        # print("A_inv " + str(A_inv.toEuler()))
         # Rotate the port such that the x axis shows back, but the angle reference
         # coinsides with previous one.
         A_r = FreeCAD.Rotation(0, 180, 0)

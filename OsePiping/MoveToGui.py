@@ -450,7 +450,7 @@ class MoveToPanel:
             port = ports[porti]
             to_port = to_ports[to_porti]
             part.Placement = port.getPartPlacement(to_part.Placement, to_port)
-            #FreeCAD.Console.PrintMessage("New placement {}.\n".format(part.Placement))
+            # FreeCAD.Console.PrintMessage("New placement {}.\n".format(part.Placement))
 
     def onApplyClicked(self):
         self.saveInput()
@@ -465,9 +465,9 @@ class MoveToPanel:
             FreeCAD.Console.PrintWarning("Cannot dermine all movement parameters. Do nothing.\n")
             return
 
-        FreeCAD.Console.PrintMessage("Rotation: " + str(R) + "\n")
-        FreeCAD.Console.PrintMessage("Gap direction: " + str(gap_dir) + "\n")
-        FreeCAD.Console.PrintMessage("Shift length: " + str(gap_len) + "\n")
+        # FreeCAD.Console.PrintMessage("Rotation: " + str(R) + "\n")
+        # FreeCAD.Console.PrintMessage("Gap direction: " + str(gap_dir) + "\n")
+        # FreeCAD.Console.PrintMessage("Shift length: " + str(gap_len) + "\n")
 
         MoveToPanel.moveTo(self.what_part, self.what_port_i, self.to_part, self.to_port_i)
         # Recalculate gap direction after the rotation.
