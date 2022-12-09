@@ -42,8 +42,13 @@ class SweepElbow(pypeType):
                         "Pipe outer diameter.").POD = dims.POD
         obj.addProperty("App::PropertyLength", "PThk",
                         "SweepElbow", "Pipe wall thickness").PThk = dims.PThk
-        obj.addProperty("App::PropertyVectorList", "Ports", "SweepElbow",
-                        "Ports relative positions.").Ports = self.getPorts(obj)
+
+        # New Dodo-pypeType already contains Ports, use them.
+        # But if pypeType does does not have Ports, add them.
+        if "App::PropertyVectorList" not in obj.supportedProperties():
+            obj.addProperty("App::PropertyVectorList", "Ports", "SweepElbow", "Ports relative positions.")
+        obj.Ports = self.getPorts(obj)
+
         obj.addProperty("App::PropertyVectorList", "PortRotationAngles", "SweepElbow",
                         "Ports rotation angles.").PortRotationAngles = self.getPortRotationAngles(obj)
         obj.addProperty("App::PropertyString", "PartNumber",

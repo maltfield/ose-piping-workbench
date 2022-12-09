@@ -41,8 +41,13 @@ class Elbow(pypeType):
                         "Distance between the center and a elbow end").H = H
         obj.addProperty("App::PropertyLength", "J", "Elbow",
                         "Distnace from the center to begin of innerpart of the socket").J = J
-        obj.addProperty("App::PropertyVectorList", "Ports", "Elbow",
-                        "Ports relative position.").Ports = self.getPorts(obj)
+
+        # New Dodo-pypeType already contains Ports, use them.
+        # But if pypeType does does not have Ports, add them.
+        if "App::PropertyVectorList" not in obj.supportedProperties():
+            obj.addProperty("App::PropertyVectorList", "Ports", "Elbow", "Ports relative positions.")
+        obj.Ports = self.getPorts(obj)
+
         obj.addProperty("App::PropertyVectorList", "PortRotationAngles", "Elbow",
                         "Ports rotation angles.").PortRotationAngles = self.getPortRotationAngles(obj)
         obj.addProperty("App::PropertyString", "PartNumber",

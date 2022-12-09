@@ -31,8 +31,13 @@ class Bushing(pypeType):
                         "Small pipe outer diameter.").POD1 = dims.POD1
         obj.addProperty("App::PropertyLength", "PThk1", "Bushing",
                         "Small pipe thickness.").PThk1 = dims.PThk1
-        obj.addProperty("App::PropertyVectorList", "Ports", "Bushing",
-                        "Ports relative positions.").Ports = self.getPorts(obj)
+
+        # New Dodo-pypeType already contains Ports, use them.
+        # But if pypeType does does not have Ports, add them.
+        if "App::PropertyVectorList" not in obj.supportedProperties():
+            obj.addProperty("App::PropertyVectorList", "Ports", "Bushing", "Ports relative positions.")
+        obj.Ports = self.getPorts(obj)
+
         obj.addProperty("App::PropertyVectorList", "PortRotationAngles", "Bushing",
                         "Ports rotation angles.").PortRotationAngles = self.getPortRotationAngles(obj)
         obj.addProperty("App::PropertyString", "PartNumber",

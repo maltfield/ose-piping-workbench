@@ -14,6 +14,7 @@ import OsePiping.Coupling as CouplingMod
 
 
 class Coupling(pypeType):
+
     def __init__(self, obj, PSize="", dims=CouplingMod.Dimensions()):
         """Create a coupling."""
         # Run parent __init__ and define common attributes
@@ -39,8 +40,13 @@ class Coupling(pypeType):
                         "Thickness of the pipe at the socket 1.").PThk = dims.PThk
         obj.addProperty("App::PropertyLength", "PThk1", "Coupling",
                         "Thickness of the pipe at the socket 2.").PThk1 = dims.PThk1
-        obj.addProperty("App::PropertyVectorList", "Ports", "Coupling",
-                        "Ports relative positions.").Ports = self.getPorts(obj)
+
+        # New Dodo-pypeType already contains Ports, use them.
+        # But if pypeType does does not have Ports, add them.
+        if "App::PropertyVectorList" not in obj.supportedProperties():
+            obj.addProperty("App::PropertyVectorList", "Ports", "Coupling", "Ports relative positions.")
+        obj.Ports = self.getPorts(obj)
+
         obj.addProperty("App::PropertyVectorList", "PortRotationAngles", "Coupling",
                         "Ports rotation angles.").PortRotationAngles = self.getPortRotationAngles(obj)
         obj.addProperty("App::PropertyString", "PartNumber",

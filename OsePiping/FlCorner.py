@@ -32,8 +32,13 @@ class Corner(pypeType):
                         "Pipe outer diameter.").POD = dims.POD
         obj.addProperty("App::PropertyLength", "PThk", "Corner",
                         "Thickness of the pipe.").PThk = dims.PThk
-        obj.addProperty("App::PropertyVectorList", "Ports", "Corner",
-                        "Ports relative positions.").Ports = self.getPorts(obj)
+
+        # New Dodo-pypeType already contains Ports, use them.
+        # But if pypeType does does not have Ports, add them.
+        if "App::PropertyVectorList" not in obj.supportedProperties():
+            obj.addProperty("App::PropertyVectorList", "Ports", "Corner", "Ports relative positions.")
+        obj.Ports = self.getPorts(obj)        
+
         obj.addProperty("App::PropertyVectorList", "PortRotationAngles", "Corner",
                         "Ports rotation angles.").PortRotationAngles = self.getPortRotationAngles(obj)
         obj.addProperty("App::PropertyString", "PartNumber",

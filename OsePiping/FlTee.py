@@ -55,8 +55,13 @@ class Tee(pypeType):
                         "Thickness of the pipe at the vertical socket.").PThk1 = dims.PThk1
         obj.addProperty("App::PropertyLength", "PThk2", "Tee",
                         "Thickness of the pipe at the other horizontal socket.").PThk2 = dims.PThk2
-        obj.addProperty("App::PropertyVectorList", "Ports", "Tee",
-                        "Ports relative positions.").Ports = self.getPorts(obj)
+
+        # New Dodo-pypeType already contains Ports, use them.
+        # But if pypeType does does not have Ports, add them.
+        if "App::PropertyVectorList" not in obj.supportedProperties():
+            obj.addProperty("App::PropertyVectorList", "Ports", "Tee", "Ports relative positions.")
+        obj.Ports = self.getPorts(obj)
+
         obj.addProperty("App::PropertyVectorList", "PortRotationAngles", "Tee",
                         "Ports rotation angles.").PortRotationAngles = self.getPortRotationAngles(obj)
         obj.addProperty("App::PropertyString", "PartNumber",

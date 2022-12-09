@@ -49,8 +49,13 @@ class Cross(pypeType):
                         "Pipe wall thickness of the vertical part").PThk1 = dims.PThk1
         obj.addProperty("App::PropertyString", "PartNumber",
                         "Cross", "Part number").PartNumber = ""
-        obj.addProperty("App::PropertyVectorList", "Ports", "Cross",
-                        "Ports relative positions.").Ports = self.getPorts(obj)
+
+        # New Dodo-pypeType already contains Ports, use them.
+        # But if pypeType does does not have Ports, add them.
+        if "App::PropertyVectorList" not in obj.supportedProperties():
+            obj.addProperty("App::PropertyVectorList", "Ports", "Cross", "Ports relative positions.")
+        obj.Ports = self.getPorts(obj)
+
         obj.addProperty("App::PropertyVectorList", "PortRotationAngles", "Cross",
                         "Ports rotation angles.").PortRotationAngles = self.getPortRotationAngles(obj)
         # Make Ports read only.
