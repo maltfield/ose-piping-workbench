@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Author: Ruslan Krenzler.
-# Date: 18 December 2020
+# Date: 10 December 2022
 # Rotate pipe or fitting.
 # Form implementation generated from reading ui file 'rotate.ui',
 # rotate.ui is derived from rotAround.ui from Dodo-Workbench, author Oddtopus.
@@ -65,6 +65,7 @@ class MoveAroundPanel:
         self.port_i = MoveAroundPanel.getPortIndexOfSelection(Gui.Selection.getSelectionEx()[-1])
         self.selObserver = SelObserver(self)
         Gui.Selection.addObserver(self.selObserver)
+#        FreeCAD.Console.PrintMessage(f"__init__ selected part {self.part.Name}.")
 
     def accept(self):
         # It is not called, because we do not show "OK"-Button.
@@ -113,6 +114,7 @@ class MoveAroundPanel:
 
         Is here a faster way to do this task?
         """
+#        FreeCAD.Console.PrintMessage("setupChildWidgets.\n")
         self.buttonUnselectAll = form.findChild(QtGui.QPushButton, "buttonUnselectAll")
 
         self.labelPartName = form.findChild(QtGui.QLabel, "labelPartName")
@@ -137,6 +139,7 @@ class MoveAroundPanel:
         self.buttonApplyRotate = form.findChild(QtGui.QPushButton, "buttonApplyRotate")
 
     def setupUi(self):
+#        FreeCAD.Console.PrintMessage("setupUi\n")
         # Call it from OsePipingCommands after Gui.Control.showDialog(panel)
         mw = self.getMainWindow()
         form = mw.findChild(QtGui.QDialog, "MoveAroundPanel")
@@ -153,6 +156,7 @@ class MoveAroundPanel:
             print("Could not restore old user input!")
             print(e)
 
+#        FreeCAD.Console.PrintMessage("setupUi: calling updateWidgets\n")
         self.updateWidgets()
 
     @staticmethod
@@ -178,6 +182,7 @@ class MoveAroundPanel:
             nsel = len(Gui.Selection.getSelectionEx())
             if nsel >= 1:
                 self.part = Gui.Selection.getSelectionEx()[-1].Object
+                FreeCAD.Console.PrintMessage(f"{self.part.Name} is selected.\n")
                 # Change selected port only if a port was selected.
                 port_i = MoveAroundPanel.getPortIndexOfSelection(Gui.Selection.getSelectionEx()[-1])
                 if port_i >= 0:
@@ -193,6 +198,11 @@ class MoveAroundPanel:
 
     def updateWidgets(self):
         if self.part is not None:
+            # For some resons updateWidgets does not change the form
+            # when the panel is called first time in FreeCAD 0.20.
+            # update and repaint of the label and the form do not help.
+            # It does work in FreeCad 0.19.
+#            FreeCAD.Console.PrintMessage(f"UpdateWidgets with part {self.part.Name}.\n")
             self.labelPartName.setText(self.part.Name)
         else:
             self.labelPartName.setText("Select part to move.")
