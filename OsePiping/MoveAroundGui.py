@@ -45,8 +45,14 @@ class SelObserver:
 #            FreeCAD.Console.PrintMessage(f"{methodName}: document {doc}.\n")
             self.panel.updatePart(FreeCAD.getDocument(doc))
         else:
-            # This occures only in FreeCAD 0.20. I do not know the reason for it.
-            FreeCAD.Console.PrintWarning(f"{methodName}: Empty document.\n")
+#            FreeCAD.Console.PrintWarning(f"{methodName}: Empty document.\n")
+            if methodName == "clearSelection":
+                # This part of the code is called by Gui.Selection.clearSelection()
+                # For example, this happens if you unselect all parts in the main view
+                # or it is called beween selection of different edges or objects.
+                # Here we do not have document we will try to get the active one.
+                doc = FreeCAD.activeDocument()
+                self.panel.updatePart(doc)
 
 # See https://github.com/yorikvanhavre/FreeCAD/blob/master/src/Mod/TemplatePyMod/TaskPanel.py
 class MoveAroundPanel:
@@ -62,16 +68,18 @@ class MoveAroundPanel:
 
     def accept(self):
         # It is not called, because we do not show "OK"-Button.
-        # FreeCAD.Console.PrintMessage("accept")
-        self.document.recompute()
+#        FreeCAD.Console.PrintMessage("accept")
+        if self.document is not None:
+            self.document.recompute()
         Gui.Selection.removeObserver(self.selObserver)
         self.saveInput()
         return True
 
     def reject(self):
-        # FreeCAD.Console.PrintMessage("reject")
-        self.document.recompute()
+#        FreeCAD.Console.PrintMessage("reject")
         Gui.Selection.removeObserver(self.selObserver)
+        if self.document is not None:
+            self.document.recompute()
         self.saveInput()
         return True
 
@@ -166,15 +174,19 @@ class MoveAroundPanel:
 #        FreeCAD.Console.PrintMessage(f"Panel.updatePart(). Doc {doc.Name}\n")
         # Only react to an active document.
         self.document = doc
-        nsel = len(Gui.Selection.getSelectionEx())
-        if nsel >= 1:
-            self.part = Gui.Selection.getSelectionEx()[-1].Object
-            # Change selected port only if a port was selected.
-            port_i = MoveAroundPanel.getPortIndexOfSelection(Gui.Selection.getSelectionEx()[-1])
-            if port_i >= 0:
-                self.port_i = port_i
+        if doc is not None:
+            nsel = len(Gui.Selection.getSelectionEx())
+            if nsel >= 1:
+                self.part = Gui.Selection.getSelectionEx()[-1].Object
+                # Change selected port only if a port was selected.
+                port_i = MoveAroundPanel.getPortIndexOfSelection(Gui.Selection.getSelectionEx()[-1])
+                if port_i >= 0:
+                    self.port_i = port_i
+            else:
+                FreeCAD.Console.PrintMessage("No part is selected.\n")
+                self.part = None
         else:
-            FreeCAD.Console.PrintMessage("No part is selected.\n")
+            FreeCAD.Console.PrintMessage("No document and no part is selected.\n")
             self.part = None
 
         self.updateWidgets()
@@ -421,3 +433,5 @@ class MoveAroundPanel:
     def onUnselectAllClicked(self):
         if self.document != None:
             Gui.Selection.clearSelection(self.document.Name)
+        else:
+            Gui.Selection.clearSelection()
