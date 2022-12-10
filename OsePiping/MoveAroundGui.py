@@ -29,18 +29,24 @@ class SelObserver:
         pass  # Do nothing
 
     def addSelection(self, doc, obj, sub, pnt):               # Selection object
-        # doc is the name of the document.
-        self.panel.updatePart(FreeCAD.getDocument(doc))
+        self.updatePart("addSelection", doc)
 
     def removeSelection(self, doc, obj, sub):                # Delete the selected object
-        self.panel.updatePart(FreeCAD.getDocument(doc))
+        self.updatePart("removeSelection", doc)
 
     def setSelection(self, doc):                           # Selection in ComboView
-        self.panel.updatePart(FreeCAD.getDocument(doc))
+        self.updatePart("setSelection", doc)
 
     def clearSelection(self, doc):                         # If click on the screen, clear the selection
-        self.panel.updatePart(FreeCAD.getDocument(doc))
+        self.updatePart("clearSelection", doc)
 
+    def updatePart(self, methodName, doc):
+        if doc!="":
+#            FreeCAD.Console.PrintMessage(f"{methodName}: document {doc}.\n")
+            self.panel.updatePart(FreeCAD.getDocument(doc))
+        else:
+            # This occures only in FreeCAD 0.20. I do not know the reason for it.
+            FreeCAD.Console.PrintWarning(f"{methodName}: Empty document.\n")
 
 # See https://github.com/yorikvanhavre/FreeCAD/blob/master/src/Mod/TemplatePyMod/TaskPanel.py
 class MoveAroundPanel:
@@ -157,7 +163,8 @@ class MoveAroundPanel:
         return -1
 
     def updatePart(self, doc):
-        # Only react to activ document.
+#        FreeCAD.Console.PrintMessage(f"Panel.updatePart(). Doc {doc.Name}\n")
+        # Only react to an active document.
         self.document = doc
         nsel = len(Gui.Selection.getSelectionEx())
         if nsel >= 1:
@@ -390,7 +397,7 @@ class MoveAroundPanel:
 
         if R is None:
             # Something went wrong, do nothing.
-            FreeCAD.Console.PrintWarning("Cannot dermine rotation parameters. Do nothing.\n")
+            FreeCAD.Console.PrintWarning("Cannot determine rotation parameters. Do nothing.\n")
             return
 
         # FreeCAD.Console.PrintMessage("Rotation: " + str(R) + "\n")
@@ -404,7 +411,7 @@ class MoveAroundPanel:
 
         if sh_dir is None or sh_len is None:
             # Something went wrong, do nothing.
-            FreeCAD.Console.PrintWarning("Cannot dermine all shift parameters. Do nothing.\n")
+            FreeCAD.Console.PrintWarning("Cannot determine all shift parameters. Do nothing.\n")
             return
 
         # FreeCAD.Console.PrintMessage("Shift direction: " + str(sh_dir) + "\n")
