@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Author: Ruslan Krenzler.
-# Date: 20 March 2021
+# Date: 10 December 2022
 # Rotate pipe or fitting.
 # Form implementation generated from reading ui file 'rotate.ui',
 # rotate.ui is derived from rotAround.ui from Dodo-Workbench, author Oddtopus.
@@ -39,16 +39,18 @@ class MoveToPanel:
 
     def accept(self):
         # It is not called, because we do not show "OK"-Button.
-        # FreeCAD.Console.PrintMessage("accept")
-        self.document.recompute()
+#        FreeCAD.Console.PrintMessage("accept")
+        if self.document is not None:
+            self.document.recompute()
         Gui.Selection.removeObserver(self.selObserver)
         self.saveInput()
         return True
 
     def reject(self):
         # FreeCAD.Console.PrintMessage("reject")
-        self.document.recompute()
         Gui.Selection.removeObserver(self.selObserver)
+        if self.document is not None:
+            self.document.recompute()
         self.saveInput()
         return True
 
@@ -178,7 +180,12 @@ class MoveToPanel:
     def updatePart(self, doc):
         # Only react to activ document.
         self.document = doc
-        self.updateSelection()
+        if doc is not None:
+            self.updateSelection()
+        else:
+            FreeCAD.Console.PrintMessage("No document and no part is selected.\n")
+            self.part = None
+
         self.updateWidgets()
 
     @staticmethod
