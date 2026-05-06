@@ -37,7 +37,7 @@ If you get an error message "module ... not found", try to remove all .pyc-files
 
 # License #
 
-Copyright (C) 2017 Stephen Kaiser <freesol29@gmail.com>
+Copyright (C) 2017 Stephen Kaiser <freesol29@gmail.com>  
 Copyright (C) 2018 Ruslan Krenzler
 
 This program is free software: you can redistribute it and/or modify
